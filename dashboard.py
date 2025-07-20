@@ -11,9 +11,12 @@ from streamlit_option_menu import option_menu
 # ========================
 # Konfigurasi Streamlit
 # ========================
+# ========================
+# Konfigurasi Streamlit
+# ========================
 st.markdown("""
     <style>
-        /* Sidebar width */
+        /* Sidebar width dan hide scroll */
         [data-testid="stSidebar"] {
             background-color: #f7f9fa;
             padding: 1rem 0.8rem;
@@ -21,8 +24,16 @@ st.markdown("""
             min-width: 300px !important;
             max-width: 300px !important;
             border-right: 1px solid #e0e0e0;
+            overflow-y: hidden !important;  /* Tambahkan ini untuk hide scroll */
         }
-
+        
+        /* Hide scrollbar but keep functionality */
+        [data-testid="stSidebar"]::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+        
         /* Adjust container padding */
         .css-1aumxhk {
             padding-top: 1rem;
@@ -47,6 +58,7 @@ st.markdown("""
         }
     </style>
 """, unsafe_allow_html=True)
+
 
 # ========================
 # Load Data dan Preprocessing
@@ -143,31 +155,74 @@ X = df[stres_cols]
 y = df["Gastritis"]
 model_results = train_model(X, y)
 
-# ========================
-# Sidebar Navigasi
-# ========================
+
 with st.sidebar:
+    st.markdown("""
+    <style>
+        .sidebar-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2E86AB;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #2E86AB;
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Logo UNJAYA di tengah menggunakan kolom
+    col1, col2, col3 = st.columns([1,2,1])
+    with col2:
+        st.image("logo_unjaya.png", width=150)
+    
+    st.markdown('<div class="sidebar-title">Analisis Stres & Gastritis</div>', unsafe_allow_html=True)
+    
+    # Menu Navigasi
     page = option_menu(
-    menu_title=None,
-    options=["Ringkasan Data", "Visualisasi", "Evaluasi Model"],
-    icons=["bar-chart-line", "diagram-3", "award"],
-    default_index=0,
+        menu_title=None,
+        options=["Beranda", "Visualisasi", "Evaluasi Model"],
+        icons=["clipboard-data", "bar-chart-line", "graph-up-arrow"],
+        default_index=0,
         styles={
-            "container": {"padding": "5px", "background-color": "#f0f2f6"},
-            "icon": {"color": "black", "font-size": "20px"},
-            "nav-link": {
-                "font-size": "16px",
-                "text-align": "left",
-                "margin": "0px",
-                "--hover-color": "#eee",
+            "container": {
+                "padding": "0!important",
+                "background-color": "#f8f9fa",
+                "border-radius": "8px",
+                "margin-bottom": "20px"
             },
-            "nav-link-selected": {"background-color": "#4CAF50", "color": "white"},
+            "icon": {
+                "color": "#2E86AB", 
+                "font-size": "16px",
+                "margin-right": "8px"
+            },
+            "nav-link": {
+                "font-size": "14px",
+                "text-align": "left",
+                "margin": "4px 0",
+                "padding": "8px 12px",
+                "border-radius": "5px",
+                "color": "#333",
+                "transition": "all 0.3s ease"
+            },
+            "nav-link:hover": {
+                "background-color": "#e3f2fd",
+                "color": "#2E86AB",
+                "transform": "translateX(3px)"
+            },
+            "nav-link-selected": {
+                "background-color": "#2E86AB",
+                "color": "white",
+                "box-shadow": "0 2px 5px rgba(0,0,0,0.1)"
+            }
         }
     )
 
+
 # ======================== \U0001F4CA RINGKASAN DATA ========================
 # ======================== 📊 RINGKASAN DATA ========================
-if page == "Ringkasan Data":
+if page == "Beranda":
     st.title("Ringkasan Data Stres dan Gastritis Mahasiswa")
 
     total_responden = len(df)
@@ -214,7 +269,7 @@ if page == "Ringkasan Data":
 
     - Mahasiswa dengan stres ringan didominasi oleh yang mengalami gastritis ringan atau tidak gastritis.
 
-    - Mahasiswa yang tidak stres hampir seluruhnya tidak mengalami gastritis.
+    - Mahasiswa yang tidak stres seluruhnya tidak mengalami gastritis.
 
     - Terdapat kecenderungan: semakin tinggi tingkat stres, semakin parah tingkat gastritis.   
     """)
@@ -223,26 +278,9 @@ if page == "Ringkasan Data":
 elif page == "Visualisasi":
     st.title("Visualisasi Data")
 
-    col1, col2, col3 = st.columns(3)
+    col2, col3 = st.columns(2)
 
-    with col1:
-        st.markdown("**Distribusi Gastritis**")
-        jumlah_gastritis = df["Gastritis"].value_counts()
-        labels = ['Tidak', 'Ya']
-        sizes = [jumlah_gastritis.get(0, 0), jumlah_gastritis.get(1, 0)]
-        colors = ['lightgreen', 'salmon']
-        explode = (0, 0.1)
-        fig1, ax1 = plt.subplots()
-        ax1.pie(sizes, labels=labels, autopct='%1.1f%%', colors=colors, explode=explode, startangle=140)
-        ax1.axis('equal')
-        st.pyplot(fig1)
-        st.markdown("""
-    - Sebanyak 84,3% mahasiswa mengalami gastritis.
-    - Hanya 15,7% mahasiswa yang tidak mengalami gastritis.
-    - Mayoritas besar mahasiswa dalam penelitian ini mengalami gastritis, baik ringan hingga parah.
-    - Persentase yang tinggi ini mengindikasikan bahwa gastritis merupakan masalah kesehatan yang signifikan di kalangan mahasiswa yang diteliti.
-    """)
-
+    
 
     with col2:
         st.markdown("**Kategori Gastritis**")
@@ -270,12 +308,12 @@ elif page == "Visualisasi":
         ax3.axis('equal')
         st.pyplot(fig3)
         st.markdown("""
-    - Sebanyak 85,2% mahasiswa yang mengalami gastritis berada dalam kategori stres parah.
-    - Hanya 7,4% mahasiswa gastritis yang mengalami stres sedang.
-    - Sebanyak 6,5% mahasiswa gastritis mengalami stres ringan.
-    - Hanya 0,9% mahasiswa gastritis yang tidak mengalami stres.
-    - Terdapat korelasi kuat antara stres parah dan kejadian gastritis, terlihat dari dominasi proporsi tersebut.
-    - Hasil ini memperkuat dugaan bahwa tingkat stres yang tinggi sangat berkaitan dengan risiko gastritis pada mahasiswa.
+    - Sebanyak 85,2% mahasiswa berada dalam kategori stres parah.
+    - Hanya 7,4% mahasiswa mengalami stres sedang.
+    - Sebanyak 6,5% mahasiswa mengalami stres ringan.
+    - Hanya 0,9% mahasiswa yang tidak mengalami stres.
+    - Mayoritas besar mahasiswa berada dalam kategori stres parah, menunjukkan tingginya tekanan akademik yang dialami.
+    - Temuan ini mengindikasikan perlunya perhatian khusus terhadap pengelolaan stres di lingkungan perkuliahan agar tidak berdampak negatif pada kesejahteraan mahasiswa.
     """)
 
     st.markdown("---")
